@@ -87,6 +87,15 @@ export const translations = {
     floatingMode: "حالت شناور",
     floatingHint: "کادر شناور قیمت‌ها در سیستم باز می‌شود",
 
+    // Settings
+    settingsTitle: "تنظیمات",
+    widgetMode: "حالت شناور",
+    widgetModeDesc: "قیمت‌های شناور چطور باز شوند؟",
+    widgetModePip: "داخل صفحه",
+    widgetModePipDesc: "کادر قابل‌جابه‌جایی داخل برنامه (حالت مرورگر)",
+    widgetModeWindow: "پنجره ویندوزی",
+    widgetModeWindowDesc: "پنجره شیشه‌ای همیشه‌روی روی دسکتاپ (فقط نسخه دسکتاپ)",
+
     // Categories
     dollar: "دلار",
     euro: "یورو",
@@ -199,6 +208,15 @@ export const translations = {
     lastRefresh: "Last refresh",
     floatingMode: "Floating mode",
     floatingHint: "Opens a floating price widget on your system",
+
+    // Settings
+    settingsTitle: "Settings",
+    widgetMode: "Floating mode",
+    widgetModeDesc: "How should floating prices open?",
+    widgetModePip: "In-page",
+    widgetModePipDesc: "Draggable box inside the app (browser style)",
+    widgetModeWindow: "Windows widget",
+    widgetModeWindowDesc: "Glassy always-on-top window on the desktop (desktop app only)",
 
     dollar: "US Dollar",
     euro: "Euro",

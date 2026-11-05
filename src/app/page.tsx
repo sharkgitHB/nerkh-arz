@@ -27,11 +27,12 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const language = useAppStore((s) => s.language);
   const activeTab = useAppStore((s) => s.activeTab);
+  const widgetMode = useAppStore((s) => s.widgetMode);
   // Dedicated floating-widget window (Electron only, ?widget=1)
-  const [widgetMode, setWidgetMode] = useState(false);
+  const [isWidgetWindow, setIsWidgetWindow] = useState(false);
 
   useEffect(() => {
-    if (window.location.search.includes("widget=1")) setWidgetMode(true);
+    if (window.location.search.includes("widget=1")) setIsWidgetWindow(true);
   }, []);
 
   // Keep the header button in sync when the widget window is closed directly
@@ -53,8 +54,10 @@ export default function Home() {
   };
 
   const handleToggleFloating = useCallback(async () => {
-    // In the desktop app, open a real always-on-top widget window
-    if (window.desktopApp?.toggleWidget) {
+    const isDesktop = Boolean(window.desktopApp?.isDesktop);
+
+    // Mode: real always-on-top window (desktop app only)
+    if (widgetMode === "window" && window.desktopApp?.toggleWidget) {
       try {
         const open = await window.desktopApp.toggleWidget();
         setFloatingOpen(open);
@@ -63,7 +66,8 @@ export default function Home() {
       }
       return;
     }
-    // Browser path: Document PiP with in-page fallback
+
+    // Mode: in-page / PiP
     if (floatingOpen) {
       // Close floating widget
       if (pipWindow) {
@@ -75,10 +79,12 @@ export default function Home() {
         setPipWindow(null);
       }
       setFloatingOpen(false);
-    } else {
-      // Try to open PiP first (requires user click activation).
-      // On browsers that don't support Document PiP (iOS Safari, Firefox),
-      // or in headless mode, this returns null and we fall back to in-page widget.
+      return;
+    }
+
+    // On the desktop app use the in-page overlay directly (Document PiP
+    // renders poorly inside Electron); browsers get real PiP when available
+    if (!isDesktop) {
       try {
         const opened = await openPipWindow(language, () => {
           setPipWindow(null);
@@ -86,16 +92,20 @@ export default function Home() {
         });
         if (opened && !opened.window.closed) {
           setPipWindow(opened);
+          // PiP window shows the prices — no in-page overlay needed
+          setFloatingOpen(false);
+          return;
         }
       } catch (e) {
         console.error("PiP open error:", e);
       }
-      setFloatingOpen(true);
     }
-  }, [floatingOpen, pipWindow, language]);
+    // In-page draggable overlay fallback
+    setFloatingOpen(true);
+  }, [widgetMode, floatingOpen, pipWindow, language]);
 
   // Floating widget window renders standalone (no header/list/banner)
-  if (widgetMode) {
+  if (isWidgetWindow) {
     return <WidgetWindow />;
   }
 
@@ -106,7 +116,7 @@ export default function Home() {
         refreshing={refreshing}
         lastRefresh={lastRefresh}
         onToggleFloating={handleToggleFloating}
-        floatingActive={floatingOpen}
+        floatingActive={floatingOpen || pipWindow !== null}
       />
 
       <main className="flex-1 mx-auto w-full max-w-2xl px-4 pt-3 pb-8">
