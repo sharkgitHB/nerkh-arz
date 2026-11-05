@@ -126,6 +126,57 @@ ipcMain.handle("update:install", () => {
   }
 });
 
+// === Floating widget: a real always-on-top frameless window ===
+let widgetWindow = null;
+
+function createWidgetWindow() {
+  if (widgetWindow && !widgetWindow.isDestroyed()) {
+    if (widgetWindow.isMinimized()) widgetWindow.restore();
+    widgetWindow.show();
+    widgetWindow.focus();
+    return;
+  }
+  widgetWindow = new BrowserWindow({
+    width: 340,
+    height: 470,
+    minWidth: 300,
+    minHeight: 380,
+    maxWidth: 480,
+    maxHeight: 760,
+    frame: false,
+    transparent: true,
+    resizable: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    hasShadow: false,
+    show: false,
+    backgroundColor: "#00000000",
+    webPreferences: {
+      preload: path.join(__dirname, "preload.cjs"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  widgetWindow.setAlwaysOnTop(true, "screen-saver");
+  widgetWindow.loadURL(`http://${HOST}:${PORT}/?widget=1`);
+  widgetWindow.once("ready-to-show", () => {
+    if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.show();
+  });
+  widgetWindow.on("closed", () => {
+    widgetWindow = null;
+    sendToWindow("widget:closed", null);
+  });
+}
+
+ipcMain.handle("widget:toggle", () => {
+  if (widgetWindow && !widgetWindow.isDestroyed()) {
+    widgetWindow.close();
+    return false;
+  }
+  createWidgetWindow();
+  return true;
+});
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 480,

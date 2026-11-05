@@ -13,4 +13,11 @@ contextBridge.exposeInMainWorld("desktopApp", {
   },
   // Quit and install a downloaded update
   installUpdate: () => ipcRenderer.invoke("update:install"),
+  // Floating widget window (desktop only)
+  toggleWidget: () => ipcRenderer.invoke("widget:toggle"),
+  onWidgetClosed: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on("widget:closed", handler);
+    return () => ipcRenderer.removeListener("widget:closed", handler);
+  },
 });

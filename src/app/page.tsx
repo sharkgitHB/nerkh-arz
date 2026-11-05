@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Header } from "@/components/currency/header";
 import { SearchBar } from "@/components/currency/search-bar";
 import { CategoryTabs } from "@/components/currency/tabs";
@@ -8,6 +8,7 @@ import { PriceList } from "@/components/currency/price-list";
 import { Converter } from "@/components/currency/converter";
 import { DetailSheet } from "@/components/currency/detail-sheet";
 import { UpdateBanner } from "@/components/currency/update-banner";
+import { WidgetWindow } from "@/components/currency/widget-window";
 import { StatusBar } from "@/components/currency/status-bar";
 import {
   FloatingWidget,
@@ -26,6 +27,19 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const language = useAppStore((s) => s.language);
   const activeTab = useAppStore((s) => s.activeTab);
+  // Dedicated floating-widget window (Electron only, ?widget=1)
+  const [widgetMode, setWidgetMode] = useState(false);
+
+  useEffect(() => {
+    if (window.location.search.includes("widget=1")) setWidgetMode(true);
+  }, []);
+
+  // Keep the header button in sync when the widget window is closed directly
+  useEffect(() => {
+    const bridge = window.desktopApp;
+    if (!bridge?.onWidgetClosed) return;
+    return bridge.onWidgetClosed(() => setFloatingOpen(false));
+  }, []);
 
   const selectedAsset = useMemo(
     () => (selectedId ? (getAsset(selectedId) ?? null) : null),
@@ -39,6 +53,17 @@ export default function Home() {
   };
 
   const handleToggleFloating = useCallback(async () => {
+    // In the desktop app, open a real always-on-top widget window
+    if (window.desktopApp?.toggleWidget) {
+      try {
+        const open = await window.desktopApp.toggleWidget();
+        setFloatingOpen(open);
+      } catch (e) {
+        console.error("widget toggle error:", e);
+      }
+      return;
+    }
+    // Browser path: Document PiP with in-page fallback
     if (floatingOpen) {
       // Close floating widget
       if (pipWindow) {
@@ -68,6 +93,11 @@ export default function Home() {
       setFloatingOpen(true);
     }
   }, [floatingOpen, pipWindow, language]);
+
+  // Floating widget window renders standalone (no header/list/banner)
+  if (widgetMode) {
+    return <WidgetWindow />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

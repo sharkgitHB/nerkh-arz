@@ -193,3 +193,13 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Floating widget window (Electron, ?widget=1) — transparent background */
+html.widget-mode,
+html.widget-mode body {
+  background: transparent !important;
+  overflow: hidden;
+}
+html.widget-mode::-webkit-scrollbar {
+  width: 0;
+}

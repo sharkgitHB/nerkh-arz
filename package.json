@@ -1,6 +1,6 @@
 {
   "name": "nextjs_tailwind_shadcn_ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "نرخ ارز — قیمت لحظه‌ای ارز، طلا و رمزارز بازار ایران + اپ دسکتاپ ویندوز",
   "main": "electron/main.cjs",
