@@ -28,6 +28,8 @@ extraResources:
 
 asar: true
 
+afterPack: scripts/after-pack.cjs
+
 # The Next.js standalone server (resources/app-server) ships its own
 # node_modules; native modules are never loaded from app.asar, so
 # rebuilding them for Electron's ABI is unnecessary.
