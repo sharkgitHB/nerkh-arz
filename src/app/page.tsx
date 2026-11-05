@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Header } from "@/components/currency/header";
 import { SearchBar } from "@/components/currency/search-bar";
 import { CategoryTabs } from "@/components/currency/tabs";
@@ -8,26 +9,26 @@ import { PriceList } from "@/components/currency/price-list";
 import { Converter } from "@/components/currency/converter";
 import { DetailSheet } from "@/components/currency/detail-sheet";
 import { UpdateBanner } from "@/components/currency/update-banner";
-import { WidgetWindow } from "@/components/currency/widget-window";
-import { StatusBar } from "@/components/currency/status-bar";
+import { WidgetWindow, WidgetPanel } from "@/components/currency/widget-window";
 import {
-  FloatingWidget,
   openPipWindow,
   type DocumentPiPWindow,
 } from "@/components/currency/floating-widget";
+import { StatusBar } from "@/components/currency/status-bar";
 import { usePrices } from "@/components/currency/use-prices";
 import { useAppStore } from "@/lib/store";
 import { getAsset } from "@/lib/assets";
 
 export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Desktop widget window state (always-on-top Electron window)
   const [floatingOpen, setFloatingOpen] = useState(false);
+  // Browser Document PiP window state
   const [pipWindow, setPipWindow] = useState<DocumentPiPWindow | null>(null);
   const { data, loading, error, errors, lastRefresh, refresh } = usePrices(60000);
   const [refreshing, setRefreshing] = useState(false);
   const language = useAppStore((s) => s.language);
   const activeTab = useAppStore((s) => s.activeTab);
-  const widgetMode = useAppStore((s) => s.widgetMode);
   // Dedicated floating-widget window (Electron only, ?widget=1)
   const [isWidgetWindow, setIsWidgetWindow] = useState(false);
 
@@ -54,10 +55,8 @@ export default function Home() {
   };
 
   const handleToggleFloating = useCallback(async () => {
-    const isDesktop = Boolean(window.desktopApp?.isDesktop);
-
-    // Mode: real always-on-top window (desktop app only)
-    if (widgetMode === "window" && window.desktopApp?.toggleWidget) {
+    // Desktop app: always open the real always-on-top widget window
+    if (window.desktopApp?.toggleWidget) {
       try {
         const open = await window.desktopApp.toggleWidget();
         setFloatingOpen(open);
@@ -67,42 +66,28 @@ export default function Home() {
       return;
     }
 
-    // Mode: in-page / PiP
-    if (floatingOpen) {
-      // Close floating widget
-      if (pipWindow) {
-        try {
-          pipWindow.window.close();
-        } catch {
-          /* ignore */
-        }
-        setPipWindow(null);
+    // Browser: Document PiP window with the same widget panel
+    if (pipWindow) {
+      try {
+        pipWindow.window.close();
+      } catch {
+        /* ignore */
       }
-      setFloatingOpen(false);
+      setPipWindow(null);
       return;
     }
 
-    // On the desktop app use the in-page overlay directly (Document PiP
-    // renders poorly inside Electron); browsers get real PiP when available
-    if (!isDesktop) {
-      try {
-        const opened = await openPipWindow(language, () => {
-          setPipWindow(null);
-          setFloatingOpen(false);
-        });
-        if (opened && !opened.window.closed) {
-          setPipWindow(opened);
-          // PiP window shows the prices — no in-page overlay needed
-          setFloatingOpen(false);
-          return;
-        }
-      } catch (e) {
-        console.error("PiP open error:", e);
+    try {
+      const opened = await openPipWindow(language, () => {
+        setPipWindow(null);
+      });
+      if (opened && !opened.window.closed) {
+        setPipWindow(opened);
       }
+    } catch (e) {
+      console.error("PiP open error:", e);
     }
-    // In-page draggable overlay fallback
-    setFloatingOpen(true);
-  }, [widgetMode, floatingOpen, pipWindow, language]);
+  }, [pipWindow, language]);
 
   // Floating widget window renders standalone (no header/list/banner)
   if (isWidgetWindow) {
@@ -150,24 +135,17 @@ export default function Home() {
         onOpenChange={(o) => !o && setSelectedId(null)}
       />
 
-      {/* Floating widget - opens as PiP window on Chrome/Edge/Android,
-          falls back to draggable in-page overlay on iOS Safari */}
-      <FloatingWidget
-        prices={data}
-        open={floatingOpen}
-        onClose={() => {
-          setFloatingOpen(false);
-          if (pipWindow) {
-            try {
-              pipWindow.window.close();
-            } catch {
-              /* ignore */
-            }
-            setPipWindow(null);
-          }
-        }}
-        pipWindow={pipWindow}
-      />
+      {/* Browser floating mode: the widget panel inside a Document PiP window */}
+      {pipWindow &&
+        createPortal(
+          <WidgetPanel
+            prices={data}
+            loading={loading}
+            lastRefresh={lastRefresh}
+            onRefresh={handleRefresh}
+          />,
+          pipWindow.window.document.body,
+        )}
 
       {/* Auto-update banner (Electron desktop only) */}
       <UpdateBanner />

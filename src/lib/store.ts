@@ -23,8 +23,7 @@ interface AppState {
   toggleLanguage: () => void;
   toggleFavorite: (id: string) => void;
   setActiveTab: (tab: AppState["activeTab"]) => void;
-  setSearchQuery: (q: string) => void;
-  setWidgetMode: (mode: WidgetMode) => void;
+  setSearchQuery: (q: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -50,15 +49,13 @@ export const useAppStore = create<AppState>()(
             : [...s.favorites, id],
         })),
       setActiveTab: (tab) => set({ activeTab: tab }),
-      setSearchQuery: (q) => set({ searchQuery: q }),
-      setWidgetMode: (mode) => set({ widgetMode: mode }),
+      setSearchQuery: (q) => set({ searchQuery: q }),
     }),
     {
       name: "currency-app-storage",
       partialize: (s) => ({
         language: s.language,
-        favorites: s.favorites,
-        widgetMode: s.widgetMode,
+        favorites: s.favorites,
       }),
     },
   ),

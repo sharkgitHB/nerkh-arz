@@ -1,6 +1,6 @@
 {
   "name": "nextjs_tailwind_shadcn_ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "نرخ ارز — قیمت لحظه‌ای ارز، طلا و رمزارز بازار ایران + اپ دسکتاپ ویندوز",
   "main": "electron/main.cjs",
@@ -14,7 +14,7 @@
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "electron:dev": "electron .",
-    "electron:build": "bun run build && electron-builder --win --dir -c.directories.output=dist-out6 --publish never && node scripts/fix-appserver.cjs && electron-builder --win nsis --prepackaged dist-out6/win-unpacked -c.directories.output=dist-out6 --publish never"
+    "electron:build": "bun run build && electron-builder --win --dir -c.directories.output=dist-out8 --publish never && node scripts/fix-appserver.cjs && electron-builder --win nsis --prepackaged dist-out8/win-unpacked -c.directories.output=dist-out8 --publish never"
   },
   "dependencies": {
     "electron-updater": "^6.8.11"

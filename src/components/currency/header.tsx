@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Moon, Sun, Languages, RefreshCw, PictureInPicture2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { SettingsPopover } from "./settings-popover";
 import { useAppStore } from "@/lib/store";
 import { t } from "@/lib/i18n";
 
@@ -82,8 +81,6 @@ export function Header({
               {language === "fa" ? "فا" : "EN"}
             </span>
           </Button>
-
-          <SettingsPopover />
 
           <Button
             variant="ghost"

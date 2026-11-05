@@ -6,7 +6,7 @@ const path = require("path");
 
 const root = process.cwd();
 const src = path.join(root, ".next", "standalone-flat", "node_modules");
-const dst = path.join(root, "dist-out6", "win-unpacked", "resources", "app-server", "node_modules");
+const dst = path.join(root, "dist-out8", "win-unpacked", "resources", "app-server", "node_modules");
 
 if (!fs.existsSync(src)) {
   console.error("source node_modules not found:", src);
