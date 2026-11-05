@@ -1,6 +1,12 @@
-appId: com.alanchand.currencyrates
+appId: com.nerkharz.app
 productName: نرخ ارز
 copyright: MIT License
+
+# Auto-update feed (electron-updater reads this at runtime)
+publish:
+  provider: github
+  owner: sharkgitHB
+  repo: nerkh-arz
 
 directories:
   output: dist-electron

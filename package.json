@@ -2,7 +2,7 @@
   "name": "nextjs_tailwind_shadcn_ts",
   "version": "1.0.0",
   "private": true,
-  "description": "Currency rates app - Iranian free market rates, gold & crypto (alanchand.com)",
+  "description": "نرخ ارز — قیمت لحظه‌ای ارز، طلا و رمزارز بازار ایران + اپ دسکتاپ ویندوز",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
