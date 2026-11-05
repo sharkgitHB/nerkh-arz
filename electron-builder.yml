@@ -1,0 +1,46 @@
+appId: com.alanchand.currencyrates
+productName: نرخ ارز
+copyright: MIT License
+
+directories:
+  output: dist-electron
+  buildResources: build
+
+# Only the Electron main/preload scripts go into app.asar;
+# the Next.js standalone server is copied to resources/app-server
+files:
+  - electron/**/*
+
+extraResources:
+  - from: .next/standalone-flat
+    to: app-server
+    filter:
+      - "**/*"
+      # electron-builder skips node_modules in extraResources unless
+      # explicitly matched
+      - "node_modules/**/*"
+
+asar: true
+
+# The Next.js standalone server (resources/app-server) ships its own
+# node_modules; native modules are never loaded from app.asar, so
+# rebuilding them for Electron's ABI is unnecessary.
+npmRebuild: false
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+# Installer (not one-click): user picks the installation folder
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: نرخ ارز
+  artifactName: CurrencyRates-Setup-${version}.${ext}
